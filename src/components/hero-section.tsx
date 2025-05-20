@@ -16,7 +16,7 @@ export default function HeroSection() {
                         <div className="relative mx-auto flex max-w-7xl flex-col px-6 lg:block lg:px-12">
                             <div className="mx-auto max-w-lg text-center lg:ml-0 lg:max-w-full lg:text-left">
                                 <h1 className="mt-8 max-w-2xl text-balance text-5xl md:text-6xl lg:mt-16 xl:text-7xl">Save Upto 10X With Subscription Manager</h1>
-                                <p className="mt-8 max-w-2xl text-balance text-lg">Made By Bahvesh Maher , Alpana Pardeshi &<br /> Chiranjeev Singh Sandhu</p>
+                                <p className="mt-8 max-w-2xl text-balance text-lg">Made By Bhavesh Maher , Alpana Pardeshi &<br /> Chiranjeev Singh Sandhu</p>
 
                                 <div className="mt-12 flex flex-col items-center justify-center gap-2 sm:flex-row lg:justify-start">
                                     <Button
