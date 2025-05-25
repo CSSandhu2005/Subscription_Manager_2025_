@@ -1,0 +1,20 @@
+{
+  "subscriptions": [
+    {
+      "id": "67f4",
+      "name": "OTT",
+      "price": "2500",
+      "category": "EnterTainMent",
+      "renewDate": "2025-03-24",
+      "priority": "Medium"
+    },
+    {
+      "id": "a056",
+      "name": "Hulu",
+      "price": "2",
+      "category": "Subscription",
+      "renewDate": "2025-02-23",
+      "priority": "Medium"
+    }
+  ]
+}
