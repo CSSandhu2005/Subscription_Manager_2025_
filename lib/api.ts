@@ -20,7 +20,8 @@ export interface Subscription {
   priority: "High" | "Medium" | "Low";
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001/subscriptions";
+const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/subscriptions`;
+
 
 // CREATE (send price as number, backend may accept number or string)
 export const createSubscription = (data: Omit<Subscription, "id">) => {
