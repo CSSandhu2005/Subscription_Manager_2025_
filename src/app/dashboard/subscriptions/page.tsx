@@ -3,13 +3,22 @@
 import { useEffect, useState } from "react";
 import { getSubscriptions, deleteSubscription } from "../../../../lib/api";
 
+interface SubscriptionAPI {
+  id: string;
+  name: string;
+  price: string;      // price as string from API
+  category: string;
+  renewDate: string;
+  priority: "High" | "Medium" | "Low";
+}
+
 interface Subscription {
   id: string;
   name: string;
-  price: number;          // number type here
+  price: number;      // number in frontend state
   category: string;
   renewDate: string;
-  priority: string;
+  priority: "High" | "Medium" | "Low";
 }
 
 export default function SubscriptionList() {
@@ -23,7 +32,12 @@ export default function SubscriptionList() {
   const fetchSubscriptions = async () => {
     try {
       const res = await getSubscriptions();
-      setSubscriptions(res.data);   // assuming res.data is Subscription[]
+      // Cast res.data as SubscriptionAPI[] because price comes as string
+      const subs: Subscription[] = (res.data as SubscriptionAPI[]).map((sub) => ({
+        ...sub,
+        price: Number(sub.price), // convert price string to number
+      }));
+      setSubscriptions(subs);
     } catch (error) {
       console.error("Failed to fetch subscriptions:", error);
     } finally {
@@ -32,9 +46,7 @@ export default function SubscriptionList() {
   };
 
   const handleDelete = async (id: string) => {
-    const confirmed = confirm(
-      "Are you sure you want to delete this subscription?"
-    );
+    const confirmed = confirm("Are you sure you want to delete this subscription?");
     if (!confirmed) return;
 
     try {
@@ -62,10 +74,7 @@ export default function SubscriptionList() {
       ) : (
         <div className="space-y-4">
           {subscriptions.map((sub) => (
-            <div
-              key={sub.id}
-              className="bg-gray-100 p-4 rounded shadow space-y-1"
-            >
+            <div key={sub.id} className="bg-gray-100 p-4 rounded shadow space-y-1">
               <p>
                 <strong>Name:</strong> {sub.name}
               </p>
@@ -83,8 +92,7 @@ export default function SubscriptionList() {
               </p>
 
               <div className="flex gap-3 mt-2">
-                {/* Replace with Link to Edit page when ready */}
-                {/* <Link href={`/dashboard/subscriptions/${sub.id}/edit`}> */}
+                {/* Edit button - can link to edit page */}
                 <button className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
                   Edit
                 </button>

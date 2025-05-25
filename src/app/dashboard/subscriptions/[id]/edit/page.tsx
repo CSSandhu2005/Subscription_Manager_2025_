@@ -23,7 +23,12 @@ export default function SubscriptionList() {
   const fetchSubscriptions = async () => {
     try {
       const res = await getSubscriptions();
-      setSubscriptions(res.data);   // assuming res.data is Subscription[]
+      // Convert price from string to number here:
+      const subsWithNumberPrice: Subscription[] = res.data.map((sub: any) => ({
+        ...sub,
+        price: Number(sub.price),
+      }));
+      setSubscriptions(subsWithNumberPrice);
     } catch (error) {
       console.error("Failed to fetch subscriptions:", error);
     } finally {
