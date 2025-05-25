@@ -2,11 +2,17 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createSubscription } from "../../../../../lib/api"; // ✅ Import backend call
+import { createSubscription } from "../../../../../lib/api";
 
 export default function NewSubscriptionPage() {
   const router = useRouter();
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    name: string;
+    price: string;
+    category: string;
+    renewDate: string;
+    priority: "Low" | "Medium" | "High";
+  }>({
     name: "",
     price: "",
     category: "",
@@ -20,7 +26,12 @@ export default function NewSubscriptionPage() {
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === "priority") {
+      setForm((prev) => ({ ...prev, priority: value as "Low" | "Medium" | "High" }));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -29,9 +40,17 @@ export default function NewSubscriptionPage() {
     setError("");
 
     try {
-      await createSubscription(form); // ✅ Send to backend
+      const payload = {
+        name: form.name,
+        price: Number(form.price),
+        category: form.category,
+        renewDate: form.renewDate,
+        priority: form.priority,
+      };
+
+      await createSubscription(payload);
       router.push("/dashboard/subscriptions");
-    } catch (err: any) {
+    } catch (err) {
       setError("Failed to create subscription.");
       console.error(err);
     } finally {
@@ -83,9 +102,9 @@ export default function NewSubscriptionPage() {
           onChange={handleChange}
           className="w-full p-2 rounded border"
         >
-          <option>Low</option>
-          <option>Medium</option>
-          <option>High</option>
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
         </select>
 
         <button
