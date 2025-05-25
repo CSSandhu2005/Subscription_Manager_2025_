@@ -15,6 +15,14 @@
       "category": "Subscription",
       "renewDate": "2025-02-23",
       "priority": "Medium"
+    },
+    {
+      "id": "8cc7",
+      "name": "Test AppliCation",
+      "price": 1000,
+      "category": "EnterTainMent",
+      "renewDate": "2025-03-13",
+      "priority": "Medium"
     }
   ]
 }

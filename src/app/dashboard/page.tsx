@@ -7,6 +7,15 @@ import { getSubscriptions, createSubscription, updateSubscription, deleteSubscri
 type Subscription = {
   id: string
   name: string
+  price: number      // number here for actual data
+  category: string
+  renewDate: string
+  priority: 'High' | 'Medium' | 'Low'
+}
+
+// Form state type: price is string for input binding
+type SubscriptionForm = {
+  name: string
   price: string
   category: string
   renewDate: string
@@ -15,16 +24,17 @@ type Subscription = {
 
 export default function SubscriptionsPage() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
-  const [form, setForm] = useState<Omit<Subscription, 'id'>>({
+
+  const [form, setForm] = useState<SubscriptionForm>({
     name: '',
     price: '',
     category: '',
     renewDate: '',
-    priority: 'Medium'
+    priority: 'Medium',
   })
+
   const [editingId, setEditingId] = useState<string | null>(null)
 
-  // Load all subscriptions on page load
   useEffect(() => {
     fetchSubscriptions()
   }, [])
@@ -32,32 +42,56 @@ export default function SubscriptionsPage() {
   const fetchSubscriptions = async () => {
     try {
       const res = await getSubscriptions()
-      setSubscriptions(res.data)
+      const subs = res.data.map((sub: any) => ({
+        ...sub,
+        price: Number(sub.price),
+      }))
+      setSubscriptions(subs)
     } catch (err) {
       console.error("Failed to fetch subscriptions:", err)
     }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
+    const name = e.target.name as keyof SubscriptionForm
+    const value = e.target.value
+
+    setForm(prev => ({
+      ...prev,
+      [name]: value,
+    }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    const priceNumber = Number(form.price)
+    if (isNaN(priceNumber)) {
+      alert('Price must be a valid number')
+      return
+    }
+
+    const payload: Omit<Subscription, 'id'> = {
+      ...form,
+      price: priceNumber,
+    }
+
     try {
       if (editingId) {
-        await updateSubscription(editingId, form)
+        await updateSubscription(editingId, payload)
         setEditingId(null)
       } else {
-        await createSubscription(form)
+        await createSubscription(payload)
       }
+
       setForm({
         name: '',
         price: '',
         category: '',
         renewDate: '',
-        priority: 'Medium'
+        priority: 'Medium',
       })
+
       fetchSubscriptions()
     } catch (err) {
       console.error('Submit error:', err)
@@ -67,10 +101,10 @@ export default function SubscriptionsPage() {
   const handleEdit = (sub: Subscription) => {
     setForm({
       name: sub.name,
-      price: sub.price,
+      price: sub.price.toString(),
       category: sub.category,
       renewDate: sub.renewDate,
-      priority: sub.priority
+      priority: sub.priority,
     })
     setEditingId(sub.id)
   }

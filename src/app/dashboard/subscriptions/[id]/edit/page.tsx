@@ -1,98 +1,105 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
-import { getSubscriptionById , updateSubscription } from "../../../../../../lib/api";
+import { getSubscriptions, deleteSubscription } from "../../../../../../lib/api";
 
-export default function EditSubscriptionPage() {
-  const router = useRouter();
-  const { id } = useParams();
-  const [form, setForm] = useState({
-    name: "",
-    price: "",
-    category: "",
-    renewDate: "",
-    priority: "Medium",
-  });
+interface Subscription {
+  id: string;
+  name: string;
+  price: number;          // number type here
+  category: string;
+  renewDate: string;
+  priority: string;
+}
+
+export default function SubscriptionList() {
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (id) {
-      getSubscriptionById(id as string)
-        .then((res) => setForm(res.data))
-        .catch((err) => console.error(err));
-    }
-  }, [id]);
+    fetchSubscriptions();
+  }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const fetchSubscriptions = async () => {
     try {
-      await updateSubscription(id as string, form);
-      router.push("/dashboard/subscriptions");
-    } catch (err) {
-      console.error("Error updating subscription", err);
+      const res = await getSubscriptions();
+      setSubscriptions(res.data);   // assuming res.data is Subscription[]
+    } catch (error) {
+      console.error("Failed to fetch subscriptions:", error);
+    } finally {
+      setLoading(false);
     }
   };
+
+  const handleDelete = async (id: string) => {
+    const confirmed = confirm(
+      "Are you sure you want to delete this subscription?"
+    );
+    if (!confirmed) return;
+
+    try {
+      await deleteSubscription(id);
+      setSubscriptions((prev) => prev.filter((sub) => sub.id !== id));
+    } catch (error) {
+      console.error("Failed to delete subscription:", error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="p-6 max-w-3xl mx-auto">
+        <p>Loading subscriptions...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6 max-w-xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-4">Edit Subscription</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          name="name"
-          placeholder="Subscription Name"
-          value={form.name}
-          onChange={handleChange}
-          required
-          className="w-full p-2 rounded border"
-        />
-        <input
-          type="number"
-          name="price"
-          placeholder="Price"
-          value={form.price}
-          onChange={handleChange}
-          required
-          className="w-full p-2 rounded border"
-        />
-        <input
-          type="text"
-          name="category"
-          placeholder="Category"
-          value={form.category}
-          onChange={handleChange}
-          className="w-full p-2 rounded border"
-        />
-        <input
-          type="date"
-          name="renewDate"
-          value={form.renewDate}
-          onChange={handleChange}
-          required
-          className="w-full p-2 rounded border"
-        />
-        <select
-          name="priority"
-          value={form.priority}
-          onChange={handleChange}
-          className="w-full p-2 rounded border"
-        >
-          <option>Low</option>
-          <option>Medium</option>
-          <option>High</option>
-        </select>
+    <div className="p-6 max-w-3xl mx-auto">
+      <h1 className="text-2xl font-semibold mb-4">All Subscriptions</h1>
 
-        <button
-          type="submit"
-          className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700 transition"
-        >
-          Update Subscription
-        </button>
-      </form>
+      {subscriptions.length === 0 ? (
+        <p>No subscriptions found.</p>
+      ) : (
+        <div className="space-y-4">
+          {subscriptions.map((sub) => (
+            <div
+              key={sub.id}
+              className="bg-gray-100 p-4 rounded shadow space-y-1"
+            >
+              <p>
+                <strong>Name:</strong> {sub.name}
+              </p>
+              <p>
+                <strong>Price:</strong> ₹{sub.price}
+              </p>
+              <p>
+                <strong>Category:</strong> {sub.category}
+              </p>
+              <p>
+                <strong>Renew Date:</strong> {sub.renewDate}
+              </p>
+              <p>
+                <strong>Priority:</strong> {sub.priority}
+              </p>
+
+              <div className="flex gap-3 mt-2">
+                {/* Replace with Link to Edit page when ready */}
+                {/* <Link href={`/dashboard/subscriptions/${sub.id}/edit`}> */}
+                <button className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                  Edit
+                </button>
+
+                <button
+                  onClick={() => handleDelete(sub.id)}
+                  className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

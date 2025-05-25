@@ -1,4 +1,4 @@
-// src/types/subscription.ts
+// src/types/subscription.ts (or lib/types.ts)
 
 export type Subscription = {
   id: string;
