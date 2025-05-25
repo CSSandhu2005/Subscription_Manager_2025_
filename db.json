@@ -1,14 +1,6 @@
 {
   "subscriptions": [
     {
-      "id": "67f4",
-      "name": "OTT",
-      "price": "2500",
-      "category": "EnterTainMent",
-      "renewDate": "2025-03-24",
-      "priority": "Medium"
-    },
-    {
       "id": "a056",
       "name": "Hulu",
       "price": "2",
@@ -22,6 +14,14 @@
       "price": 1000,
       "category": "EnterTainMent",
       "renewDate": "2025-03-13",
+      "priority": "Medium"
+    },
+    {
+      "id": "c56e",
+      "name": "UI Course ",
+      "price": 1000,
+      "category": "Study Course",
+      "renewDate": "2026-03-24",
       "priority": "Medium"
     }
   ]
