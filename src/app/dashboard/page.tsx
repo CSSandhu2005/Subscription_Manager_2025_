@@ -1,32 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getSubscriptions, createSubscription, updateSubscription, deleteSubscription } from "../../../lib/api";
+import {
+  getSubscriptions,
+  createSubscription,
+  updateSubscription,
+  deleteSubscription,
+  Subscription,
+} from "../../../lib/api";
 import { SignedIn, UserButton } from "@clerk/nextjs";
-
-interface Subscription {
-  id: string;
-  name: string;
-  price: number;
-  category: string;
-  renewDate: string;
-  priority: "High" | "Medium" | "Low";
-}
-
-interface SubscriptionAPI {
-  id: string;
-  name: string;
-  price: string;
-  category: string;
-  renewDate: string;
-  priority: "High" | "Medium" | "Low";
-}
 
 export default function SubscriptionList() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // New subscription form state
   const [newSub, setNewSub] = useState<Omit<Subscription, "id">>({
     name: "",
     price: 0,
@@ -37,9 +24,10 @@ export default function SubscriptionList() {
 
   const [creating, setCreating] = useState(false);
 
-  // Editing states
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editData, setEditData] = useState<Omit<Subscription, "id"> | null>(null);
+  const [editData, setEditData] = useState<Omit<Subscription, "id"> | null>(
+    null
+  );
   const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
@@ -48,11 +36,7 @@ export default function SubscriptionList() {
 
   const fetchSubscriptions = async () => {
     try {
-      const res = await getSubscriptions();
-      const subs: Subscription[] = res.data.map((sub: SubscriptionAPI) => ({
-        ...sub,
-        price: Number(sub.price),
-      }));
+      const subs = await getSubscriptions();
       setSubscriptions(subs);
     } catch (error) {
       console.error("Failed to fetch subscriptions:", error);
@@ -88,7 +72,6 @@ export default function SubscriptionList() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Basic validation
     if (
       !newSub.name ||
       newSub.price <= 0 ||
@@ -102,14 +85,8 @@ export default function SubscriptionList() {
 
     setCreating(true);
     try {
-      const res = await createSubscription(newSub);
-      const createdSub = {
-        ...res.data,
-        price: Number(res.data.price),
-      };
+      const createdSub = await createSubscription(newSub);
       setSubscriptions((prev) => [createdSub, ...prev]);
-
-      // Reset form
       setNewSub({
         name: "",
         price: 0,
@@ -125,7 +102,6 @@ export default function SubscriptionList() {
     }
   };
 
-  // Start editing a subscription
   const handleEditClick = (sub: Subscription) => {
     setEditingId(sub.id);
     setEditData({
@@ -137,7 +113,6 @@ export default function SubscriptionList() {
     });
   };
 
-  // Handle edit form input changes
   const handleEditInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -149,11 +124,9 @@ export default function SubscriptionList() {
     });
   };
 
-  // Save updated subscription
   const handleUpdate = async (id: string) => {
     if (!editData) return;
 
-    // Basic validation
     if (
       !editData.name ||
       editData.price <= 0 ||
@@ -167,12 +140,7 @@ export default function SubscriptionList() {
 
     setUpdating(true);
     try {
-      const res = await updateSubscription(id, editData);
-      const updatedSub = {
-        ...res.data,
-        price: Number(res.data.price),
-      };
-
+      const updatedSub = await updateSubscription(id, editData);
       setSubscriptions((prev) =>
         prev.map((sub) => (sub.id === id ? updatedSub : sub))
       );
@@ -186,7 +154,6 @@ export default function SubscriptionList() {
     }
   };
 
-  // Cancel editing mode
   const handleCancelEdit = () => {
     setEditingId(null);
     setEditData(null);
@@ -209,7 +176,6 @@ export default function SubscriptionList() {
       <div className="p-6 max-w-3xl mx-auto space-y-6">
         <h1 className="text-2xl font-semibold mb-4">All Subscriptions</h1>
 
-        {/* Add New Subscription Form */}
         <form
           onSubmit={handleCreate}
           className="bg-white p-4 rounded shadow space-y-4 border"
@@ -226,7 +192,6 @@ export default function SubscriptionList() {
               className="border px-3 py-2 rounded w-full"
               required
             />
-
             <input
               type="number"
               name="price"
@@ -238,7 +203,6 @@ export default function SubscriptionList() {
               className="border px-3 py-2 rounded w-full"
               required
             />
-
             <input
               type="text"
               name="category"
@@ -248,7 +212,6 @@ export default function SubscriptionList() {
               className="border px-3 py-2 rounded w-full"
               required
             />
-
             <input
               type="date"
               name="renewDate"
@@ -257,7 +220,6 @@ export default function SubscriptionList() {
               className="border px-3 py-2 rounded w-full"
               required
             />
-
             <select
               name="priority"
               value={newSub.priority}
@@ -282,7 +244,6 @@ export default function SubscriptionList() {
           </button>
         </form>
 
-        {/* Subscription List */}
         {subscriptions.length === 0 ? (
           <p>No subscriptions found.</p>
         ) : (
@@ -335,21 +296,18 @@ export default function SubscriptionList() {
                       <option value="Low">Low</option>
                     </select>
 
-                    <div className="flex gap-3 mt-2">
+                    <div className="flex space-x-2 mt-2">
                       <button
                         onClick={() => handleUpdate(sub.id)}
                         disabled={updating}
-                        className={`bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 ${
-                          updating ? "opacity-70 cursor-not-allowed" : ""
-                        }`}
+                        className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
                       >
                         {updating ? "Saving..." : "Save"}
                       </button>
-
                       <button
                         onClick={handleCancelEdit}
                         disabled={updating}
-                        className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"
+                        className="bg-gray-400 text-white px-3 py-1 rounded hover:bg-gray-500"
                       >
                         Cancel
                       </button>
@@ -357,30 +315,19 @@ export default function SubscriptionList() {
                   </>
                 ) : (
                   <>
-                    <p>
-                      <strong>Name:</strong> {sub.name}
-                    </p>
-                    <p>
-                      <strong>Price:</strong> ₹{sub.price}
-                    </p>
-                    <p>
-                      <strong>Category:</strong> {sub.category}
-                    </p>
-                    <p>
-                      <strong>Renew Date:</strong> {sub.renewDate}
-                    </p>
-                    <p>
-                      <strong>Priority:</strong> {sub.priority}
-                    </p>
+                    <h3 className="font-semibold text-lg">{sub.name}</h3>
+                    <p>Price: ₹{sub.price.toFixed(2)}</p>
+                    <p>Category: {sub.category}</p>
+                    <p>Renew Date: {sub.renewDate}</p>
+                    <p>Priority: {sub.priority}</p>
 
-                    <div className="flex gap-3 mt-2">
+                    <div className="flex space-x-2 mt-2">
                       <button
                         onClick={() => handleEditClick(sub)}
-                        className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                        className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
                       >
                         Edit
                       </button>
-
                       <button
                         onClick={() => handleDelete(sub.id)}
                         className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
@@ -405,12 +352,7 @@ function Navbar() {
       <div className="max-w-3xl mx-auto flex justify-between items-center">
         <div className="text-lg font-bold">Subscription Manager</div>
         <div className="space-x-4 flex items-center">
-          <a href="/dashboard" className="hover:underline">
-            Dashboard
-          </a>
-          <a href="/dashboard/subscriptions" className="hover:underline">
-            Subscriptions
-          </a>
+          <a href="/dashboard/subscriptions">Subscriptions</a>
           <SignedIn>
             <UserButton />
           </SignedIn>

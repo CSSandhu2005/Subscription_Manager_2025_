@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getSubscriptions, deleteSubscription } from "../../../../../../lib/api";
+import { v4 as uuidv4 } from "uuid";
 
 interface SubscriptionAPI {
   id: string;
@@ -72,7 +73,7 @@ export default function SubscriptionList() {
       ) : (
         <div className="space-y-4">
           {subscriptions.map((sub) => (
-            <div key={sub.id} className="bg-gray-100 p-4 rounded shadow space-y-1">
+            <div key={uuidv4()} className="bg-gray-100 p-4 rounded shadow space-y-1">
               <p><strong>Name:</strong> {sub.name}</p>
               <p><strong>Price:</strong> ₹{sub.price}</p>
               <p><strong>Category:</strong> {sub.category}</p>

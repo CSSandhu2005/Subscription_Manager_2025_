@@ -1,25 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getSubscriptions, deleteSubscription } from "../../../../lib/api";
-
-interface SubscriptionAPI {
-  id: string;
-  name: string;
-  price: string; // price from API as string
-  category: string;
-  renewDate: string;
-  priority: "High" | "Medium" | "Low" | string;
-}
-
-interface Subscription {
-  id: string;
-  name: string;
-  price: number; // price in frontend as number
-  category: string;
-  renewDate: string;
-  priority: "High" | "Medium" | "Low" | string;
-}
+import { getSubscriptions, deleteSubscription, Subscription } from "../../../../lib/api";
+import { v4 as uuidv4 } from "uuid";
 
 export default function SubscriptionList() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
@@ -31,11 +14,7 @@ export default function SubscriptionList() {
 
   const fetchSubscriptions = async () => {
     try {
-      const res = await getSubscriptions();
-      const subs: Subscription[] = (res.data as SubscriptionAPI[]).map((sub) => ({
-        ...sub,
-        price: Number(sub.price),
-      }));
+      const subs = await getSubscriptions();
       setSubscriptions(subs);
     } catch (error) {
       console.error("Failed to fetch subscriptions:", error);
@@ -72,7 +51,7 @@ export default function SubscriptionList() {
       ) : (
         <div className="space-y-4">
           {subscriptions.map((sub) => (
-            <div key={sub.id} className="bg-gray-100 p-4 rounded shadow space-y-1">
+            <div key={uuidv4()} className="bg-gray-100 p-4 rounded shadow space-y-1">
               <p><strong>Name:</strong> {sub.name}</p>
               <p><strong>Price:</strong> ₹{sub.price}</p>
               <p><strong>Category:</strong> {sub.category}</p>

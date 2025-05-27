@@ -1,8 +1,9 @@
 import axios from "axios";
 
-// Backend sends price as string, so define API type:
+// Backend sends price as string
 export interface SubscriptionAPI {
-  id: string;
+  id?: string;
+  _id?: string;
   name: string;
   price: string;        // string from backend
   category: string;
@@ -20,27 +21,54 @@ export interface Subscription {
   priority: "High" | "Medium" | "Low";
 }
 
+// Make sure this env variable does NOT end with a slash
 const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/subscriptions`;
 
+// Helper to convert API type to frontend type
+function convertApiToSubscription(sub: SubscriptionAPI): Subscription {
+  return {
+    id: sub.id || sub._id || "",
+    name: sub.name,
+    price: Number(sub.price),
+    category: sub.category,
+    renewDate: sub.renewDate,
+    priority: sub.priority,
+  };
+}
 
-// CREATE (send price as number, backend may accept number or string)
-export const createSubscription = (data: Omit<Subscription, "id">) => {
-  return axios.post<Subscription>(API_BASE_URL, data);
+// CREATE
+export const createSubscription = async (
+  data: Omit<Subscription, "id">
+): Promise<Subscription> => {
+  const res = await axios.post<SubscriptionAPI>(API_BASE_URL, {
+    ...data,
+    price: data.price.toString(), // send price as string to backend
+  });
+  return convertApiToSubscription(res.data);
 };
 
-// READ ALL (response returns SubscriptionAPI[], with price as string)
-export const getSubscriptions = () => {
-  return axios.get<SubscriptionAPI[]>(API_BASE_URL);
+// READ ALL
+export const getSubscriptions = async (): Promise<Subscription[]> => {
+  const res = await axios.get<SubscriptionAPI[]>(API_BASE_URL);
+  return res.data.map(convertApiToSubscription);
 };
 
-// READ ONE (response returns SubscriptionAPI, price as string)
-export const getSubscriptionById = (id: string) => {
-  return axios.get<SubscriptionAPI>(`${API_BASE_URL}/${id}`);
+// READ ONE
+export const getSubscriptionById = async (id: string): Promise<Subscription> => {
+  const res = await axios.get<SubscriptionAPI>(`${API_BASE_URL}/${id}`);
+  return convertApiToSubscription(res.data);
 };
 
-// UPDATE (send price as number)
-export const updateSubscription = (id: string, data: Omit<Subscription, "id">) => {
-  return axios.put<Subscription>(`${API_BASE_URL}/${id}`, data);
+// UPDATE
+export const updateSubscription = async (
+  id: string,
+  data: Omit<Subscription, "id">
+): Promise<Subscription> => {
+  const res = await axios.put<SubscriptionAPI>(`${API_BASE_URL}/${id}`, {
+    ...data,
+    price: data.price.toString(), // send price as string to backend
+  });
+  return convertApiToSubscription(res.data);
 };
 
 // DELETE
