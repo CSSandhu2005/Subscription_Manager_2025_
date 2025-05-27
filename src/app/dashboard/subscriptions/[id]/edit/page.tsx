@@ -33,7 +33,8 @@ export default function SubscriptionList() {
   const fetchSubscriptions = async () => {
     try {
       const res = await getSubscriptions();
-      const subs: Subscription[] = (res.data as SubscriptionAPI[]).map((sub) => ({
+      // res is already SubscriptionAPI[]
+      const subs: Subscription[] = res.map((sub) => ({
         ...sub,
         price: Number(sub.price), // convert string to number
       }));
